@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shikhar Mishra - Personal Webpage</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+        #container {
+            max-width: 900px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: #f5f5f5;
+            color: #333333;
+            padding: 0;
+            margin-bottom: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            max-width: 500px;
+            margin-left: 20px;
+        }
+        nav {
+            display: flex;
+            margin: 0;
+        }
+        nav a {
+            color: #7c7c7c;
+            text-decoration: none;
+            margin-right: 20px;
+            font-size: 1em;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        #content {
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            margin-left: 20px;
+        }
+        #content img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        section {
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        p, li {
+            line-height: 1.8;
+            font-size: 0.9em;
+            color: #7c7c7c;
+        }
+        .resume-email {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #666666;
+        }
+        .resume-email a {
+            color: #333333;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        .resume-email a:last-child {
+            margin-left: 10px; /* Adding space before the email */
+        }
+        .resume-email a:hover {
+            text-decoration: underline;
+        }
+        .horizontal-line {
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .experience-section {
+            margin-top: 20px;
+        }
+        .experience-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .experience-item img {
+            width: 50px;
+            height: 50px;
+            margin-right: 20px;
+        }
+        .experience-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .experience-details h3 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        .experience-details p {
+            margin: 5px 0;
+            font-size: 1em;
+            color: #666666;
+        }
+        .experience-dates {
+            font-size: 0.8em;
+            background-color: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 5px;
+            margin-left: 10px;
+            display: inline-block;
+            white-space: nowrap;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <header>
+            <nav>
+                <a href="#about">about</a>
+                <a href="#blogs">blogs</a>
+                <a href="#projects">projects</a>
+                <a href="#github">github</a>
+            </nav>
+        </header>
+
+        <div id="content">
+            <img src="/home/shikhar2807/Downloads/slimevolley.gif" alt="Slime Volley Animation">
+
+            <section id="introduction">
+                <h2>shikhar mishra</h2>
+                <p>Deep Diving into machine learning, optimizations with some pinch of CUDA.</p>
+                
+                <div class="resume-email">
+                    <a href="/home/shikhar2807/Downloads/Resume2.02024.pdf" target="_blank">Resume [PDF]</a>
+                    <span>|</span>
+                    <a href="mailto:shikhar2807.ace@gmail.com">shikhar2807[dot]ace@gmail[dot]com</a>
+                </div>
+
+                <div class="horizontal-line"></div>
+            </section>
+
+            <section id="experience" class="experience-section">
+                <div class="experience-item">
+                    <img src="/home/shikhar2807/Downloads/orangewood_labs_logo.jpeg" alt="OrangeWood Labs Logo">
+                    <div class="experience-details">
+                        <h3>OrangeWood Labs (YC W18)</h3>
+                        <p>Machine Learning Research Intern <span class="experience-dates">June 2024 – Present</span></p>
+                    </div>
+                </div>
+
+                <div class="experience-item">
+                    <img src="/home/shikhar2807/Downloads/buildspaceso_logo.jpeg" alt="Buildspace Logo">
+                    <div class="experience-details">
+                        <h3>Buildspace (YC W20 and a16z)</h3>
+                        <p>N&W Season 4 Builder <span class="experience-dates">Sep 2023 – Oct 2023</span></p>
+                    </div>
+                </div>
+
+                <div class="experience-item">
+                    <img src="/home/shikhar2807/Downloads/chhatrapati_shahu_ji_maharaj_university_logo.jpeg" alt="University Logo">
+                    <div class="experience-details">
+                        <h3>Chhatrapati Shahu Ji Maharaj University</h3>
+                        <p>B.Sc. in Mathematics with Artificial Intelligence</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
