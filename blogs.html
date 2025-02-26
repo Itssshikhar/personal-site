@@ -171,19 +171,39 @@
             renderer.image = function(href, title, text) {
                 console.log('Processing image in markdown:', href);
                 
-                // Fix relative paths
-                let originalHref = href;
-                if (href.startsWith('../assets/')) {
-                    href = href.replace('../assets/', '/assets/');
-                } else if (href.startsWith('/assets/')) {
-                    // Keep as is
-                } else if (href.startsWith('assets/')) {
-                    href = '/' + href;
+                // Handle case where href is an object instead of a string
+                let originalHref = '';
+                if (typeof href === 'object') {
+                    console.log('href is an object:', href);
+                    // Try to extract the href from the object
+                    if (href.href) {
+                        originalHref = href.href;
+                    } else if (href.raw) {
+                        // Try to extract from raw markdown
+                        const match = href.raw.match(/\]\((.*?)\)/);
+                        if (match && match[1]) {
+                            originalHref = match[1];
+                        }
+                    }
+                } else {
+                    originalHref = href;
                 }
                 
-                console.log('Transformed image path:', originalHref, '->', href);
+                console.log('Extracted href:', originalHref);
                 
-                let out = `<img src="${href}" alt="${text}" data-original-src="${originalHref}"`;
+                // Fix relative paths
+                let newHref = originalHref;
+                if (originalHref.startsWith && originalHref.startsWith('../assets/')) {
+                    newHref = originalHref.replace('../assets/', '/assets/');
+                } else if (originalHref.startsWith && originalHref.startsWith('/assets/')) {
+                    // Keep as is
+                } else if (originalHref.startsWith && originalHref.startsWith('assets/')) {
+                    newHref = '/' + originalHref;
+                }
+                
+                console.log('Transformed image path:', originalHref, '->', newHref);
+                
+                let out = `<img src="${newHref}" alt="${text}" data-original-src="${originalHref}"`;
                 if (title) {
                     out += ` title="${title}"`;
                 }
@@ -233,9 +253,18 @@
             // Function to load and display a blog post
             function loadAndDisplayBlogPost(file) {
                 console.log('Loading blog post:', file);
-                fetch(`/personal-site/blogs/${file}?_=${new Date().getTime()}`)
+                
+                // Determine if we're in local development or production
+                const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const basePath = isLocalDev ? '' : '/personal-site';
+                const fetchUrl = `${basePath}/blogs/${file}?_=${new Date().getTime()}`;
+                
+                console.log('Fetching blog post from:', fetchUrl);
+                
+                fetch(fetchUrl)
                     .then(response => {
                         if (!response.ok) {
+                            console.error('Failed to load blog post, status:', response.status);
                             throw new Error('Failed to load blog post');
                         }
                         return response.text();
@@ -243,7 +272,12 @@
                     .then(markdownContent => {
                         console.log('Blog post loaded successfully, rendering content');
                         displayBlogPost(markdownContent);
-                        window.history.pushState({}, '', `/personal-site/blogs.html#${file}`);
+                        
+                        // Determine if we're in local development or production
+                        const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                        const basePath = isLocalDev ? '' : '/personal-site';
+                        
+                        window.history.pushState({}, '', `${basePath}/blogs.html#${file}`);
                     })
                     .catch(error => {
                         console.error('Error loading blog post:', error);
@@ -270,7 +304,12 @@
                 backButton.onclick = (e) => {
                     e.preventDefault();
                     showBlogList();
-                    window.history.pushState({}, '', '/personal-site/blogs.html');
+                    
+                    // Determine if we're in local development or production
+                    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const basePath = isLocalDev ? '' : '/personal-site';
+                    
+                    window.history.pushState({}, '', `${basePath}/blogs.html`);
                 };
 
                 // Fix image paths if needed
@@ -280,19 +319,22 @@
                     
                     console.log('Checking image path:', originalSrc, 'Current:', currentSrc);
                     
+                    // Determine if we're in local development or production
+                    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const basePath = isLocalDev ? '' : '/personal-site';
+                    
                     let newSrc = currentSrc;
                     // Handle relative paths starting with ../assets/
                     if (originalSrc && originalSrc.includes('../assets/')) {
-                        newSrc = originalSrc.replace('../assets/', '/assets/');
+                        newSrc = originalSrc.replace('../assets/', `${basePath}/assets/`);
                     }
                     // Handle paths starting with /assets/
                     else if (originalSrc && originalSrc.startsWith('/assets/')) {
-                        // Keep as is
-                        newSrc = originalSrc;
+                        newSrc = `${basePath}${originalSrc}`;
                     }
                     // Handle paths starting with assets/
                     else if (originalSrc && originalSrc.startsWith('assets/')) {
-                        newSrc = '/' + originalSrc;
+                        newSrc = `${basePath}/${originalSrc}`;
                     }
                     
                     if (newSrc !== currentSrc) {
@@ -303,24 +345,41 @@
                     // Add error handling for images
                     img.onerror = function() {
                         console.error('Failed to load image:', originalSrc, '→', this.src);
+                        
                         // Try alternative paths if loading fails
-                        if (this.src.startsWith('/assets/')) {
-                            console.log('Trying alternative path with /personal-site prefix');
-                            this.src = '/personal-site' + this.src;
-                        } else if (this.src.startsWith('/personal-site/assets/')) {
-                            console.log('Trying alternative path without /personal-site prefix');
-                            this.src = this.src.replace('/personal-site', '');
-                        } else {
-                            // Show error styling
-                            this.style.border = '1px dashed red';
-                            this.style.padding = '10px';
-                            this.style.width = '100%';
-                            this.style.height = 'auto';
-                            this.style.display = 'flex';
-                            this.style.justifyContent = 'center';
-                            this.style.alignItems = 'center';
-                            this.alt = 'Image failed to load: ' + originalSrc;
+                        if (!this.hasAttribute('data-tried-alternatives')) {
+                            this.setAttribute('data-tried-alternatives', 'true');
+                            
+                            // Try with personal-site prefix
+                            if (isLocalDev && this.src.startsWith('/assets/')) {
+                                console.log('Trying with /personal-site prefix');
+                                this.src = '/personal-site' + this.src;
+                                return;
+                            }
+                            
+                            // Try without personal-site prefix
+                            if (!isLocalDev && this.src.includes('/personal-site/')) {
+                                console.log('Trying without /personal-site prefix');
+                                this.src = this.src.replace('/personal-site', '');
+                                return;
+                            }
+                            
+                            // Try direct path to assets folder
+                            console.log('Trying direct path to assets folder');
+                            const filename = originalSrc.split('/').pop();
+                            this.src = `${basePath}/assets/${filename}`;
+                            return;
                         }
+                        
+                        // If all alternatives failed, show error styling
+                        this.style.border = '1px dashed red';
+                        this.style.padding = '10px';
+                        this.style.width = '100%';
+                        this.style.height = 'auto';
+                        this.style.display = 'flex';
+                        this.style.justifyContent = 'center';
+                        this.style.alignItems = 'center';
+                        this.alt = 'Image failed to load: ' + originalSrc;
                     };
                 });
             }
