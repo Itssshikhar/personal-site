@@ -164,11 +164,38 @@
             const blogEntriesElement = document.querySelector('.blog-entries');
             const blogListSection = document.getElementById('blog-list');
 
-            // Configure marked options
+            // Configure marked options and custom renderer
+            const renderer = new marked.Renderer();
+            
+            // Custom image renderer to handle paths
+            renderer.image = function(href, title, text) {
+                console.log('Processing image in markdown:', href);
+                
+                // Fix relative paths
+                let originalHref = href;
+                if (href.startsWith('../assets/')) {
+                    href = href.replace('../assets/', '/assets/');
+                } else if (href.startsWith('/assets/')) {
+                    // Keep as is
+                } else if (href.startsWith('assets/')) {
+                    href = '/' + href;
+                }
+                
+                console.log('Transformed image path:', originalHref, '->', href);
+                
+                let out = `<img src="${href}" alt="${text}" data-original-src="${originalHref}"`;
+                if (title) {
+                    out += ` title="${title}"`;
+                }
+                out += '>';
+                return out;
+            };
+            
             marked.setOptions({
                 breaks: true,
                 gfm: true,
-                baseUrl: '/personal-site/'
+                baseUrl: '/personal-site/',
+                renderer: renderer
             });
 
             // Function to get formatted title from filename
@@ -205,6 +232,7 @@
 
             // Function to load and display a blog post
             function loadAndDisplayBlogPost(file) {
+                console.log('Loading blog post:', file);
                 fetch(`/personal-site/blogs/${file}?_=${new Date().getTime()}`)
                     .then(response => {
                         if (!response.ok) {
@@ -213,6 +241,7 @@
                         return response.text();
                     })
                     .then(markdownContent => {
+                        console.log('Blog post loaded successfully, rendering content');
                         displayBlogPost(markdownContent);
                         window.history.pushState({}, '', `/personal-site/blogs.html#${file}`);
                     })
@@ -246,9 +275,53 @@
 
                 // Fix image paths if needed
                 document.querySelectorAll('.blog-content img').forEach(img => {
-                    if (img.src.includes('../assets/')) {
-                        img.src = img.src.replace('../assets/', '/personal-site/assets/');
+                    const originalSrc = img.getAttribute('data-original-src') || img.getAttribute('src');
+                    const currentSrc = img.getAttribute('src');
+                    
+                    console.log('Checking image path:', originalSrc, 'Current:', currentSrc);
+                    
+                    let newSrc = currentSrc;
+                    // Handle relative paths starting with ../assets/
+                    if (originalSrc && originalSrc.includes('../assets/')) {
+                        newSrc = originalSrc.replace('../assets/', '/assets/');
                     }
+                    // Handle paths starting with /assets/
+                    else if (originalSrc && originalSrc.startsWith('/assets/')) {
+                        // Keep as is
+                        newSrc = originalSrc;
+                    }
+                    // Handle paths starting with assets/
+                    else if (originalSrc && originalSrc.startsWith('assets/')) {
+                        newSrc = '/' + originalSrc;
+                    }
+                    
+                    if (newSrc !== currentSrc) {
+                        console.log('Updating image src:', currentSrc, '->', newSrc);
+                        img.src = newSrc;
+                    }
+                    
+                    // Add error handling for images
+                    img.onerror = function() {
+                        console.error('Failed to load image:', originalSrc, '→', this.src);
+                        // Try alternative paths if loading fails
+                        if (this.src.startsWith('/assets/')) {
+                            console.log('Trying alternative path with /personal-site prefix');
+                            this.src = '/personal-site' + this.src;
+                        } else if (this.src.startsWith('/personal-site/assets/')) {
+                            console.log('Trying alternative path without /personal-site prefix');
+                            this.src = this.src.replace('/personal-site', '');
+                        } else {
+                            // Show error styling
+                            this.style.border = '1px dashed red';
+                            this.style.padding = '10px';
+                            this.style.width = '100%';
+                            this.style.height = 'auto';
+                            this.style.display = 'flex';
+                            this.style.justifyContent = 'center';
+                            this.style.alignItems = 'center';
+                            this.alt = 'Image failed to load: ' + originalSrc;
+                        }
+                    };
                 });
             }
 
